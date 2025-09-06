@@ -1,11 +1,13 @@
 <?php
-// pages/item.php — детальна картка товару
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../db/db.php';
 $id = (int)($_GET['id'] ?? 0);
 $db = db();
-$stmt = $db->prepare('SELECT * FROM items WHERE id = :id');
+$stmt = $db->prepare('SELECT i.*, c.name AS category_name
+                        FROM items i
+                   LEFT JOIN categories c ON c.id = i.category_id
+                       WHERE i.id = :id');
 $stmt->execute([':id'=>$id]);
 $it = $stmt->fetch();
 if (!$it) { echo '<p>Товар не знайдено.</p>'; exit; }
@@ -25,6 +27,7 @@ if (!$it) { echo '<p>Товар не знайдено.</p>'; exit; }
     <p><b>Сектор:</b> <?= htmlspecialchars($it['sector'] ?: '—') ?></p>
     <p><b>Нотатки:</b><br><?= nl2br(htmlspecialchars($it['notes'] ?: '—')) ?></p>
     <p><b>Кількість на залишку:</b> <?= (int)$it['qty'] ?></p>
+    <p><b>Категорія:</b> <?= htmlspecialchars($it['category_name'] ?: '—') ?></p>
     <form method="post" action="/logic/cart_logic.php" class="row">
       <input type="hidden" name="action" value="add">
       <input type="hidden" name="item_id" value="<?= (int)$it['id'] ?>">

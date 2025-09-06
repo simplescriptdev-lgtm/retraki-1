@@ -1,20 +1,23 @@
 <?php
-// pages/inventory.php — список товарів
+// pages/inventory.php — список товарів (з категоріями)
 declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/../db/db.php';
+require_once __DIR__ . '/../db/db.php';   // ← СПОЧАТКУ підключаємо БД
 
 $user = $_SESSION['user'] ?? null;
-$db = db();
+$db = db();                                // ← ЛИШЕ ПІСЛЯ require
 
 $q = trim($_GET['q'] ?? '');
-$sql = "SELECT * FROM items WHERE deleted_at IS NULL";
+$sql = "SELECT i.*, c.name AS category_name
+          FROM items i
+     LEFT JOIN categories c ON c.id = i.category_id
+         WHERE i.deleted_at IS NULL";
 $params = [];
 if ($q !== '') {
-  $sql .= " AND (name LIKE :q OR sku LIKE :q OR brand LIKE :q OR sector LIKE :q)";
+  $sql .= " AND (i.name LIKE :q OR i.sku LIKE :q OR i.brand LIKE :q OR i.sector LIKE :q OR c.name LIKE :q)";
   $params[':q'] = "%{$q}%";
 }
-$sql .= " ORDER BY created_at DESC";
+$sql .= " ORDER BY i.created_at DESC";
 
 $st = $db->prepare($sql);
 $st->execute($params);
@@ -26,7 +29,7 @@ $err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
 <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
   <h2>Залишки</h2>
   <form method="get" action="/pages/inventory.php" style="display:flex;gap:8px">
-    <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Пошук по назві/артикулу/бренду/сектору...">
+    <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Пошук по назві/артикулу/бренду/сектору/категорії...">
     <button class="btn secondary">Пошук</button>
   </form>
 </div>
@@ -47,7 +50,11 @@ $err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
         <strong><?= htmlspecialchars($it['name']) ?></strong>
         <span class="badge">К-сть: <?= (int)$it['qty'] ?></span>
       </div>
-      <div class="row"><span class="badge"><?= htmlspecialchars($it['brand'] ?: '—') ?></span><span class="badge">SKU: <?= htmlspecialchars($it['sku'] ?: '—') ?></span></div>
+      <div class="row">
+        <span class="badge"><?= htmlspecialchars($it['brand'] ?: '—') ?></span>
+        <span class="badge">SKU: <?= htmlspecialchars($it['sku'] ?: '—') ?></span>
+        <span class="badge"><?= htmlspecialchars($it['category_name'] ?: 'Без категорії') ?></span>
+      </div>
       <small>Сектор: <?= htmlspecialchars($it['sector'] ?: '—') ?></small>
       <div class="row">
         <form method="post" action="/logic/cart_logic.php" style="display:flex;gap:6px;align-items:center">
