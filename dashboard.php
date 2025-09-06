@@ -33,6 +33,8 @@ $user = $_SESSION['user'];
           <a href="#" data-page="add_item" class="nav-link">Додати товар</a>
           <a href="#" data-page="manage_users" class="nav-link">Користувачі</a>
           <a href="#" data-page="manage_locations" class="nav-link">Локації</a>
+          <a href="#" data-page="audit_items" class="nav-link">Історія змін та видалення товару</a>
+
         <?php endif; ?>
       </nav>
     </aside>

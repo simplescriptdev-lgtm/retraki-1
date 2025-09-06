@@ -1,19 +1,39 @@
 <?php
-// pages/inventory.php — список товарів у вигляді карток
+// pages/inventory.php — список товарів
 declare(strict_types=1);
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once __DIR__ . '/../db/db.php';
-session_start();
 
+$user = $_SESSION['user'] ?? null;
 $db = db();
-$items = $db->query('SELECT * FROM items ORDER BY created_at DESC')->fetchAll();
+
+$q = trim($_GET['q'] ?? '');
+$sql = "SELECT * FROM items WHERE deleted_at IS NULL";
+$params = [];
+if ($q !== '') {
+  $sql .= " AND (name LIKE :q OR sku LIKE :q OR brand LIKE :q OR sector LIKE :q)";
+  $params[':q'] = "%{$q}%";
+}
+$sql .= " ORDER BY created_at DESC";
+
+$st = $db->prepare($sql);
+$st->execute($params);
+$items = $st->fetchAll();
+
+$ok  = $_SESSION['inv_ok']  ?? null; unset($_SESSION['inv_ok']);
+$err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
 ?>
 <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
   <h2>Залишки</h2>
   <form method="get" action="/pages/inventory.php" style="display:flex;gap:8px">
-    <input type="text" name="q" placeholder="Пошук по назві/артикулу...">
+    <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Пошук по назві/артикулу/бренду/сектору...">
     <button class="btn secondary">Пошук</button>
   </form>
 </div>
+
+<?php if ($ok): ?><div class="alert" style="background:#062e0d;color:#86efac"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
+<?php if ($err): ?><div class="alert error"><?= htmlspecialchars($err) ?></div><?php endif; ?>
+
 <div class="grid">
 <?php foreach ($items as $it): ?>
   <div class="card">
@@ -40,6 +60,17 @@ $items = $db->query('SELECT * FROM items ORDER BY created_at DESC')->fetchAll();
           <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
           <button class="btn secondary" type="submit">Деталі</button>
         </form>
+        <?php if (($user['role'] ?? '') === 'manager'): ?>
+          <form method="get" action="/pages/edit_item.php">
+            <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
+            <button class="btn secondary" type="submit">Редагувати</button>
+          </form>
+          <form method="post" action="/logic/edit_item_logic.php" onsubmit="return confirm('Підтвердити видалення?');">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
+            <button class="btn danger" type="submit">Видалити</button>
+          </form>
+        <?php endif; ?>
       </div>
     </div>
   </div>
