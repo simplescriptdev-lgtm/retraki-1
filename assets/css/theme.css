@@ -1,4 +1,4 @@
-/* ===== Topbar (mobile) ===== */
+/* Topbar (mobile) */
 .topbar{display:none;position:sticky;top:0;z-index:1000;height:56px;padding:0 12px;background:#0f172a;border-bottom:1px solid #1f2937;align-items:center;gap:12px}
 .hamburger{width:40px;height:40px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:6px;border-radius:8px}
 .hamburger span{display:block;height:3px;width:22px;background:#e2e8f0;border-radius:3px;transition:.2s}
@@ -14,7 +14,7 @@
 .content{padding:24px}
 .content>.container{max-width:1280px;margin:0 auto}
 
-/* Десктоп: ліве меню + контент на одній лінії */
+/* Десктопний лейаут: меню + контент в один ряд */
 @media (min-width:993px){
   .app{display:flex;align-items:flex-start}
   .sidebar{flex:0 0 240px;width:240px;position:sticky;top:0;align-self:flex-start;padding-top:24px}
@@ -22,7 +22,7 @@
   .content>*:first-child{margin-top:0}
 }
 
-/* Toolbar: заголовок + пошук (стабільно на grid) */
+/* Toolbar (заголовок + пошук) */
 .toolbar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;margin-bottom:16px}
 .toolbar h2{margin:0}
 .toolbar .search{justify-self:end;display:flex;gap:8px;align-items:center;width:100%;max-width:640px}
@@ -31,11 +31,11 @@
 /* Сітка карток */
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
 
-/* Картка: медіа й фото */
+/* Картка */
 .card .media{height:220px;background:#0a0f1e;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #1f2937}
 .card .media img{width:100%;height:100%;object-fit:cover;object-position:center}
 
-/* Бейджі/кнопки базові (якщо їх ще нема у style.css) */
+/* Бейджі/кнопки (базові, якщо в базовому css немає) */
 .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;background:#23304a;color:#d0d8e5;border:1px solid #1f2937}
 .badge.success{background:#0b2a17;color:#a7f3d0;border-color:#0f3a20}
 .badge.warn{background:#2b210a;color:#fde68a;border-color:#3a2b10}
@@ -46,7 +46,7 @@
 .btn.secondary{background:#2b3a5a;color:#e2e8f0}
 .btn.danger{background:#dc2626;color:#fff}
 
-/* Планшет/мобільна адаптація */
+/* Планшет/мобілка */
 @media (max-width:992px){
   .topbar{display:flex}
   .app{display:block}
@@ -67,4 +67,53 @@
   .card .media{height:300px}
   .row{gap:8px}
   .btn{padding:10px 12px}
+}
+/* ==== Карта товару: корпус, відступи, типографіка ==== */
+.card{
+  background:#0f172a;
+  border:1px solid #1f2937;
+  border-radius:14px;
+  overflow:hidden;
+}
+.card .body{
+  padding:12px 12px 16px;
+}
+.card .title{
+  font-weight:800;
+  font-size:16px;
+  margin:8px 0 6px;
+}
+.card .meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+
+/* ==== Блок дій під карткою ==== */
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;            /* ← дозволяємо перенос, щоб нічого не «розпирало» */
+  align-items:center;
+  margin-top:8px;
+}
+
+/* форми всередині дій — компактні, а не на всю ширину */
+.actions form{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  margin:0;
+}
+
+/* трішки підрівняємо висоту елементів у дії */
+.actions input[type="number"]{
+  width:90px;               /* дублюємо, щоб точно перебити базові правила */
+  height:36px;
+}
+.actions .btn{
+  height:36px;
+  line-height:36px;
+  padding:0 12px;
 }

@@ -1,4 +1,4 @@
-// SPA + модалки + мобільне меню (стабільно з підпапкою)
+// SPA + модалки + мобільне меню — стабільна версія
 (() => {
   const BASE = window.BASE || "";
   const sidebar  = document.getElementById("sidebar");
@@ -6,42 +6,62 @@
   const burger   = document.getElementById("menuToggle");
   const MQ = 992;
 
-  function openMenu(){ if(!sidebar||!backdrop||!burger) return;
-    sidebar.classList.add("open"); backdrop.classList.add("show");
-    burger.classList.add("is-open"); burger.setAttribute("aria-expanded","true");
+  function openMenu(){
+    if(!sidebar||!backdrop||!burger) return;
+    sidebar.classList.add("open");
+    backdrop.classList.add("show");
+    burger.classList.add("is-open");
+    burger.setAttribute("aria-expanded","true");
     document.body.style.overflow="hidden";
   }
-  function closeMenu(){ if(!sidebar||!backdrop||!burger) return;
-    sidebar.classList.remove("open"); backdrop.classList.remove("show");
-    burger.classList.remove("is-open"); burger.setAttribute("aria-expanded","false");
+  function closeMenu(){
+    if(!sidebar||!backdrop||!burger) return;
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+    burger.classList.remove("is-open");
+    burger.setAttribute("aria-expanded","false");
     document.body.style.overflow="";
   }
   function loadPage(name, query=""){
     const url = `${BASE}/pages/${name}.php${query?("?"+query):""}`;
-    fetch(url).then(r=>{ if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
-      .then(html=>{
-        const content = document.getElementById("content"); if(!content) return;
+    fetch(url)
+      .then(r => { if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.text(); })
+      .then(html => {
+        const content = document.getElementById("content");
+        if (!content) return;
         content.innerHTML = html;
+
         document.querySelectorAll(".nav-link[data-page]").forEach(x=>{
           x.classList.toggle("active", x.getAttribute("data-page")===name && !x.closest("#content"));
         });
-        if(window.afterPageLoad) window.afterPageLoad(name);
-      }).catch(e=>console.error("loadPage error:", e));
+
+        if (window.afterPageLoad) window.afterPageLoad(name);
+      })
+      .catch(err => console.error("loadPage error:", err));
   }
 
- document.addEventListener("click", e=>{
+  // Делегування кліків по SPA-посиланнях
+  document.addEventListener("click", e => {
     const el = e.target.closest("a.nav-link,button.nav-link");
-    if(!el) return;
-    const page = el.getAttribute("data-page"); if(!page) return;
+    if (!el) return;
+
+    const page = el.getAttribute("data-page");
+    if (!page) return; // звичайні посилання/кнопки не чіпаємо
+
     e.preventDefault();
     const query = el.getAttribute("data-query") || "";
     loadPage(page, query);
-    if(window.innerWidth < MQ) closeMenu();
+    if (window.innerWidth < MQ) closeMenu();
   });
 
-  // Автовідкриття вкладки з ?open=
+  // Мобільне меню
+  burger?.addEventListener("click", e => { e.preventDefault(); sidebar?.classList.contains("open") ? closeMenu() : openMenu(); });
+  backdrop?.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+  window.addEventListener("resize", () => { if (window.innerWidth >= MQ) closeMenu(); });
+
+  // Автовідкриття з ?open=
   document.addEventListener("DOMContentLoaded", () => {
-    console.info("scripts.js loaded. BASE =", BASE);
     const params = new URLSearchParams(location.search);
     const open = params.get("open");
     if (open) {
@@ -54,28 +74,11 @@
     }
   });
 
-  burger?.addEventListener("click", e=>{ e.preventDefault(); 
-    if(sidebar?.classList.contains("open")) closeMenu(); else openMenu();
-  });
-  backdrop?.addEventListener("click", closeMenu);
-  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeMenu(); });
-  window.addEventListener("resize", ()=>{ if(window.innerWidth>=MQ) closeMenu(); });
-
-  // Автовідкриття з ?open=
-  document.addEventListener("DOMContentLoaded", ()=>{
-    const params=new URLSearchParams(location.search); const open=params.get("open");
-    if(open){ let q=""; if(open==="item"){ const id=params.get("id"); if(id) q="id="+encodeURIComponent(id); }
-      loadPage(open,q);
-    }
-
   /* ====== Модалка деталей видаленого товару (з аудиту) ====== */
-  function escapeHtml(str) {
+  function escapeHtml(str){
     return String(str)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
   document.addEventListener("click", e => {
     const btn = e.target.closest(".open-deleted-details");
@@ -86,7 +89,7 @@
     if (!holder) return;
 
     let data = {};
-    try { data = JSON.parse(holder.textContent || "{}") || {}; } catch (_) {}
+    try { data = JSON.parse(holder.textContent || "{}") || {}; } catch(_) {}
 
     const body = document.getElementById("deletedItemBody");
     const modal = document.getElementById("deletedItemModal");
@@ -104,24 +107,18 @@
           <p><b>Бренд:</b> ${escapeHtml(data.brand || "—")}</p>
           <p><b>Артикул:</b> ${escapeHtml(data.sku || "—")}</p>
           <p><b>Сектор:</b> ${escapeHtml(data.sector || "—")}</p>
-          <p><b>Кількість на момент видалення:</b> ${Number.isFinite(+data.qty) ? +data.qty : "—"}</p>
+          <p><b>Кількість:</b> ${Number.isFinite(+data.qty) ? +data.qty : "—"}</p>
           <p><b>Створено:</b> ${escapeHtml(data.created_at || "—")}</p>
           <p><b>Нотатки:</b><br>${escapeHtml(data.notes || "—").replace(/\n/g, "<br>")}</p>
         </div>
-      </div>
-    `;
-
+      </div>`;
     modal.style.display = "flex";
   });
-  // Закриття модалки
   document.addEventListener("click", e => {
     if (e.target.id === "modalCloseBtn" || e.target.closest("#modalCloseBtn")) {
       const modal = document.getElementById("deletedItemModal");
       if (modal) modal.style.display = "none";
     }
-    if (e.target && e.target.id === "deletedItemModal") {
-      e.target.style.display = "none";
-    }
+    if (e.target && e.target.id === "deletedItemModal") e.target.style.display = "none";
   });
-
 })();
