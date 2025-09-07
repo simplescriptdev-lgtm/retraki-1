@@ -30,3 +30,28 @@ form .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
 @media (max-width:900px){.sidebar{width:200px}.card img{height:140px}}
 @media (max-width:640px){.layout{flex-direction:column}.sidebar{width:100%;display:flex;overflow:auto}.content{padding:10px}}
 .hint{opacity:.8;font-size:12px;margin-top:8px}
+
+
+/* --- картки / сітка --- */
+.grid{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); }
+.card{ background:#141c30; border:1px solid #1f2937; border-radius:14px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.25); }
+.card .media{ height:180px; background:#0a0f1e; display:flex; align-items:center; justify-content:center; border-bottom:1px solid #1f2937; }
+.card .media img{ max-width:100%; max-height:100%; object-fit:cover; }
+.card .body{ padding:14px; display:flex; flex-direction:column; gap:8px; }
+.card .title{ font-weight:700; }
+.card .meta{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+
+/* --- бейджі --- */
+.badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px;
+        background:#23304a; color:#d0d8e5; border:1px solid #1f2937; }
+.badge.success{ background:#0b2a17; color:#a7f3d0; border-color:#0f3a20; }
+.badge.warn{ background:#2b210a; color:#fde68a; border-color:#3a2b10; }
+.badge.danger{ background:#2a0b0b; color:#fecaca; border-color:#3b0f0f; }
+
+/* --- кнопки --- */
+.btn{ border:none; cursor:pointer; font-weight:700; padding:8px 14px; border-radius:10px; transition:.15s; }
+.btn:hover{ transform:translateY(-1px); opacity:.95; }
+.btn.primary{ background:#2563eb; color:#fff; }
+.btn.secondary{ background:#2b3a5a; color:#e2e8f0; }
+.btn.danger{ background:#dc2626; color:#fff; }

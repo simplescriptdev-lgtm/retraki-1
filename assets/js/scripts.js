@@ -1,107 +1,151 @@
-// ===== SPA з підтримкою query (?id=...) =====
-function loadPage(name, query = "") {
-  const url = "/pages/" + name + ".php" + (query ? ("?" + query) : "");
-  fetch(url)
-    .then(r => r.text())
-    .then(html => {
-      const content = document.getElementById("content");
-      content.innerHTML = html;
-      // підсвітка активного пункту меню (зліва)
-      document.querySelectorAll(".nav-link[data-page]").forEach(x => {
-        x.classList.toggle("active", x.getAttribute("data-page") === name && !x.closest("#content"));
-      });
-      if (window.afterPageLoad) window.afterPageLoad(name);
-    });
-}
+// assets/js/scripts.js — SPA + модалки + мобільне меню
+(() => {
+  const BASE = window.BASE || "";
+  const sidebar  = document.getElementById("sidebar");
+  const backdrop = document.getElementById("backdrop");
+  const burger   = document.getElementById("menuToggle");
+  const MQ = 992; // брейкпоінт як у CSS
 
-// Автовідкриття вкладки з ?open=
-document.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(location.search);
-  const open = params.get("open");
-  if (open) {
-    let q = "";
-    if (open === "item") {
-      const id = params.get("id");
-      if (id) q = "id=" + encodeURIComponent(id);
+  function openMenu() {
+    if (!sidebar || !backdrop || !burger) return;
+    sidebar.classList.add("open");
+    backdrop.classList.add("show");
+    burger.classList.add("is-open");
+    burger.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+  function closeMenu() {
+    if (!sidebar || !backdrop || !burger) return;
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+    burger.classList.remove("is-open");
+    burger.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+  function toggleMenu() {
+    if (sidebar?.classList.contains("open")) closeMenu();
+    else openMenu();
+  }
+
+  function loadPage(name, query = "") {
+    const url = `${BASE}/pages/${name}.php${query ? "?" + query : ""}`;
+    fetch(url)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.text(); })
+      .then(html => {
+        const content = document.getElementById("content");
+        if (!content) return;
+        content.innerHTML = html;
+
+        // підсвітка активного (тільки для пунктів меню зліва)
+        document.querySelectorAll(".nav-link[data-page]").forEach(x => {
+          x.classList.toggle("active", x.getAttribute("data-page") === name && !x.closest("#content"));
+        });
+        if (window.afterPageLoad) window.afterPageLoad(name);
+      })
+      .catch(err => console.error("loadPage error:", err));
+  }
+
+  // Делегування кліків по .nav-link (меню та контент)
+  document.addEventListener("click", e => {
+    const el = e.target.closest("a.nav-link, button.nav-link");
+    if (!el) return;
+
+    const page = el.getAttribute("data-page");
+    if (!page) return;
+
+    e.preventDefault();
+    const query = el.getAttribute("data-query") || "";
+    loadPage(page, query);
+
+    // якщо це мобільний — закриємо меню після переходу
+    if (window.innerWidth < MQ) closeMenu();
+  });
+
+  // Автовідкриття вкладки з ?open=
+  document.addEventListener("DOMContentLoaded", () => {
+    console.info("scripts.js loaded. BASE =", BASE);
+    const params = new URLSearchParams(location.search);
+    const open = params.get("open");
+    if (open) {
+      let q = "";
+      if (open === "item") {
+        const id = params.get("id");
+        if (id) q = "id=" + encodeURIComponent(id);
+      }
+      loadPage(open, q);
     }
-    loadPage(open, q);
+  });
+
+  // Гамбургер
+  burger?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleMenu();
+  });
+  // Закриття кліком по фону
+  backdrop?.addEventListener("click", closeMenu);
+  // Закриття ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+  // Автоматично закриваємо меню, якщо розтягнули екран
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= MQ) closeMenu();
+  });
+
+  /* ====== Модалка деталей видаленого товару (з аудиту) ====== */
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
-});
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".open-deleted-details");
+    if (!btn) return;
 
-// ===== ДЕЛЕГУВАННЯ: працює і для меню, і для кнопок усередині контенту =====
-document.addEventListener("click", (e) => {
-  const el = e.target.closest("a.nav-link, button.nav-link");
-  if (!el) return;
-  const page = el.getAttribute("data-page");
-  if (!page) return;
-  e.preventDefault();
-  const query = el.getAttribute("data-query") || "";
-  loadPage(page, query);
-});
+    const id = btn.getAttribute("data-audit-id");
+    const holder = document.getElementById("audit-json-" + id);
+    if (!holder) return;
 
-/* ============================ */
-/*  Глобальні обробники модалки */
-/* ============================ */
+    let data = {};
+    try { data = JSON.parse(holder.textContent || "{}") || {}; } catch (_) {}
 
-// Безпечне екранування HTML
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-// Відкриття модалки з деталями видаленого товару (подієва делегація)
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".open-deleted-details");
-  if (!btn) return;
-
-  const id = btn.getAttribute("data-audit-id");
-  const holder = document.getElementById("audit-json-" + id);
-  if (!holder) return;
-
-  let data = {};
-  try { data = JSON.parse(holder.textContent || "{}") || {}; } catch(_) {}
-
-  const body = document.getElementById("deletedItemBody");
-  const modal = document.getElementById("deletedItemModal");
-  if (!body || !modal) return;
-
-  const img = (data.photo && typeof data.photo === "string")
-    ? '<img src="' + data.photo + '" alt="Фото товару" style="width:260px;max-height:220px;object-fit:cover;border:1px solid #1f2937;border-radius:8px;background:#0a0f1e">'
-    : '<div class="badge">Немає фото</div>';
-
-  body.innerHTML = `
-    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-      <div>${img}</div>
-      <div style="flex:1;min-width:240px">
-        <p><b>Назва:</b> ${escapeHtml(data.name || "—")}</p>
-        <p><b>Бренд:</b> ${escapeHtml(data.brand || "—")}</p>
-        <p><b>Артикул:</b> ${escapeHtml(data.sku || "—")}</p>
-        <p><b>Сектор:</b> ${escapeHtml(data.sector || "—")}</p>
-        <p><b>Кількість на момент видалення:</b> ${Number.isFinite(+data.qty) ? +data.qty : "—"}</p>
-        <p><b>Створено:</b> ${escapeHtml(data.created_at || "—")}</p>
-        <p><b>Нотатки:</b><br>${escapeHtml(data.notes || "—").replace(/\n/g,"<br>")}</p>
-      </div>
-    </div>
-  `;
-
-  modal.style.display = "flex";
-});
-
-// Закриття модалки кнопкою
-document.addEventListener("click", (e) => {
-  if (e.target.id === "modalCloseBtn" || e.target.closest("#modalCloseBtn")) {
+    const body = document.getElementById("deletedItemBody");
     const modal = document.getElementById("deletedItemModal");
-    if (modal) modal.style.display = "none";
-  }
-});
+    if (!body || !modal) return;
 
-// Закриття модалки кліком по фону
-document.addEventListener("click", (e) => {
-  if (e.target && e.target.id === "deletedItemModal") {
-    e.target.style.display = "none";
-  }
-});
+    const img = (data.photo && typeof data.photo === "string")
+      ? `<img src="${data.photo}" alt="Фото товару" style="width:260px;max-height:220px;object-fit:cover;border:1px solid #1f2937;border-radius:8px;background:#0a0f1e">`
+      : '<div class="badge">Немає фото</div>';
+
+    body.innerHTML = `
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div>${img}</div>
+        <div style="flex:1;min-width:240px">
+          <p><b>Назва:</b> ${escapeHtml(data.name || "—")}</p>
+          <p><b>Бренд:</b> ${escapeHtml(data.brand || "—")}</p>
+          <p><b>Артикул:</b> ${escapeHtml(data.sku || "—")}</p>
+          <p><b>Сектор:</b> ${escapeHtml(data.sector || "—")}</p>
+          <p><b>Кількість на момент видалення:</b> ${Number.isFinite(+data.qty) ? +data.qty : "—"}</p>
+          <p><b>Створено:</b> ${escapeHtml(data.created_at || "—")}</p>
+          <p><b>Нотатки:</b><br>${escapeHtml(data.notes || "—").replace(/\n/g, "<br>")}</p>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = "flex";
+  });
+  // Закриття модалки
+  document.addEventListener("click", e => {
+    if (e.target.id === "modalCloseBtn" || e.target.closest("#modalCloseBtn")) {
+      const modal = document.getElementById("deletedItemModal");
+      if (modal) modal.style.display = "none";
+    }
+    if (e.target && e.target.id === "deletedItemModal") {
+      e.target.style.display = "none";
+    }
+  });
+
+})();
