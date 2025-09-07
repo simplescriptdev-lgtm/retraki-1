@@ -26,13 +26,14 @@ $items = $st->fetchAll();
 $ok  = $_SESSION['inv_ok']  ?? null; unset($_SESSION['inv_ok']);
 $err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
 ?>
-<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+<div class="toolbar">
   <h2>Залишки</h2>
-  <form method="get" action="/pages/inventory.php" class="row" style="gap:8px">
+  <form method="get" action="/pages/inventory.php" class="search">
     <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Пошук по назві / артикулу / бренду / сектору / категорії…">
     <button class="btn secondary" type="submit">Пошук</button>
   </form>
 </div>
+
 
 <?php if ($ok):  ?><div class="alert ok"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
 <?php if ($err): ?><div class="alert error"><?= htmlspecialchars($err) ?></div><?php endif; ?>
