@@ -64,11 +64,13 @@ $BASE = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     </aside>
 
     <!-- Контент -->
+        <!-- Контент -->
     <main class="content">
-      <div id="content">
+      <div class="container" id="content">
         <?php include __DIR__ . '/pages/inventory.php'; ?>
       </div>
     </main>
+
   </div>
 </body>
 </html>
