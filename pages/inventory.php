@@ -65,7 +65,13 @@ $err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
         </form>
         <form method="get" action="/pages/item.php">
           <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
-          <button class="btn secondary" type="submit">Деталі</button>
+          
+          <!-- було: форма з action="/pages/item.php" -->
+<!-- стало: SPA-посилання -->
+<a href="#" class="btn secondary nav-link"
+   data-page="item"
+   data-query="id=<?= (int)$it['id'] ?>">Деталі</a>
+
         </form>
         <?php if (($user['role'] ?? '') === 'manager'): ?>
           <form method="get" action="/pages/edit_item.php">
