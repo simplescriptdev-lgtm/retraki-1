@@ -1,64 +1,42 @@
-// assets/js/scripts.js — SPA + модалки + мобільне меню
+// SPA + модалки + мобільне меню (стабільно з підпапкою)
 (() => {
   const BASE = window.BASE || "";
   const sidebar  = document.getElementById("sidebar");
   const backdrop = document.getElementById("backdrop");
   const burger   = document.getElementById("menuToggle");
-  const MQ = 992; // брейкпоінт як у CSS
+  const MQ = 992;
 
-  function openMenu() {
-    if (!sidebar || !backdrop || !burger) return;
-    sidebar.classList.add("open");
-    backdrop.classList.add("show");
-    burger.classList.add("is-open");
-    burger.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = "hidden";
+  function openMenu(){ if(!sidebar||!backdrop||!burger) return;
+    sidebar.classList.add("open"); backdrop.classList.add("show");
+    burger.classList.add("is-open"); burger.setAttribute("aria-expanded","true");
+    document.body.style.overflow="hidden";
   }
-  function closeMenu() {
-    if (!sidebar || !backdrop || !burger) return;
-    sidebar.classList.remove("open");
-    backdrop.classList.remove("show");
-    burger.classList.remove("is-open");
-    burger.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = "";
+  function closeMenu(){ if(!sidebar||!backdrop||!burger) return;
+    sidebar.classList.remove("open"); backdrop.classList.remove("show");
+    burger.classList.remove("is-open"); burger.setAttribute("aria-expanded","false");
+    document.body.style.overflow="";
   }
-  function toggleMenu() {
-    if (sidebar?.classList.contains("open")) closeMenu();
-    else openMenu();
-  }
-
-  function loadPage(name, query = "") {
-    const url = `${BASE}/pages/${name}.php${query ? "?" + query : ""}`;
-    fetch(url)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.text(); })
-      .then(html => {
-        const content = document.getElementById("content");
-        if (!content) return;
+  function loadPage(name, query=""){
+    const url = `${BASE}/pages/${name}.php${query?("?"+query):""}`;
+    fetch(url).then(r=>{ if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+      .then(html=>{
+        const content = document.getElementById("content"); if(!content) return;
         content.innerHTML = html;
-
-        // підсвітка активного (тільки для пунктів меню зліва)
-        document.querySelectorAll(".nav-link[data-page]").forEach(x => {
-          x.classList.toggle("active", x.getAttribute("data-page") === name && !x.closest("#content"));
+        document.querySelectorAll(".nav-link[data-page]").forEach(x=>{
+          x.classList.toggle("active", x.getAttribute("data-page")===name && !x.closest("#content"));
         });
-        if (window.afterPageLoad) window.afterPageLoad(name);
-      })
-      .catch(err => console.error("loadPage error:", err));
+        if(window.afterPageLoad) window.afterPageLoad(name);
+      }).catch(e=>console.error("loadPage error:", e));
   }
 
-  // Делегування кліків по .nav-link (меню та контент)
-  document.addEventListener("click", e => {
-    const el = e.target.closest("a.nav-link, button.nav-link");
-    if (!el) return;
-
-    const page = el.getAttribute("data-page");
-    if (!page) return;
-
+ document.addEventListener("click", e=>{
+    const el = e.target.closest("a.nav-link,button.nav-link");
+    if(!el) return;
+    const page = el.getAttribute("data-page"); if(!page) return;
     e.preventDefault();
     const query = el.getAttribute("data-query") || "";
     loadPage(page, query);
-
-    // якщо це мобільний — закриємо меню після переходу
-    if (window.innerWidth < MQ) closeMenu();
+    if(window.innerWidth < MQ) closeMenu();
   });
 
   // Автовідкриття вкладки з ?open=
@@ -76,21 +54,19 @@
     }
   });
 
-  // Гамбургер
-  burger?.addEventListener("click", (e) => {
-    e.preventDefault();
-    toggleMenu();
+  burger?.addEventListener("click", e=>{ e.preventDefault(); 
+    if(sidebar?.classList.contains("open")) closeMenu(); else openMenu();
   });
-  // Закриття кліком по фону
   backdrop?.addEventListener("click", closeMenu);
-  // Закриття ESC
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeMenu();
-  });
-  // Автоматично закриваємо меню, якщо розтягнули екран
-  window.addEventListener("resize", () => {
-    if (window.innerWidth >= MQ) closeMenu();
-  });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeMenu(); });
+  window.addEventListener("resize", ()=>{ if(window.innerWidth>=MQ) closeMenu(); });
+
+  // Автовідкриття з ?open=
+  document.addEventListener("DOMContentLoaded", ()=>{
+    const params=new URLSearchParams(location.search); const open=params.get("open");
+    if(open){ let q=""; if(open==="item"){ const id=params.get("id"); if(id) q="id="+encodeURIComponent(id); }
+      loadPage(open,q);
+    }
 
   /* ====== Модалка деталей видаленого товару (з аудиту) ====== */
   function escapeHtml(str) {

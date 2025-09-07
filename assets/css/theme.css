@@ -1,154 +1,70 @@
 /* ===== Topbar (mobile) ===== */
-.topbar{
-  display:none;
-  position:sticky; top:0; z-index:1000;
-  height:56px; padding:0 12px;
-  background:#0f172a; border-bottom:1px solid #1f2937;
-  align-items:center; gap:12px;
-}
-.hamburger{
-  width:40px; height:40px; border:none; background:transparent; cursor:pointer;
-  display:flex; flex-direction:column; justify-content:center; gap:5px; padding:6px; border-radius:8px;
-}
-.hamburger span{
-  display:block; height:3px; width:22px; background:#e2e8f0; border-radius:3px; transition:.2s;
-}
-.hamburger.is-open span:nth-child(1){ transform:translateY(8px) rotate(45deg); }
-.hamburger.is-open span:nth-child(2){ opacity:0; }
-.hamburger.is-open span:nth-child(3){ transform:translateY(-8px) rotate(-45deg); }
+.topbar{display:none;position:sticky;top:0;z-index:1000;height:56px;padding:0 12px;background:#0f172a;border-bottom:1px solid #1f2937;align-items:center;gap:12px}
+.hamburger{width:40px;height:40px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:6px;border-radius:8px}
+.hamburger span{display:block;height:3px;width:22px;background:#e2e8f0;border-radius:3px;transition:.2s}
+.hamburger.is-open span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+.hamburger.is-open span:nth-child(2){opacity:0}
+.hamburger.is-open span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
 
-/* ===== Backdrop ===== */
-.backdrop{
-  position:fixed; inset:0; background:rgba(0,0,0,.5);
-  z-index:900; display:none;
-}
-.backdrop.show{ display:block; }
+/* Backdrop */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:none}
+.backdrop.show{display:block}
 
-/* ===== Контентна область ===== */
-.content{ padding:24px; }
-.content > .container{
-  max-width:1280px;     /* робоча ширина */
-  margin:0 auto;        /* центр відносно правої частини (без сайдбару) */
+/* Контентна область */
+.content{padding:24px}
+.content>.container{max-width:1280px;margin:0 auto}
+
+/* Десктоп: ліве меню + контент на одній лінії */
+@media (min-width:993px){
+  .app{display:flex;align-items:flex-start}
+  .sidebar{flex:0 0 240px;width:240px;position:sticky;top:0;align-self:flex-start;padding-top:24px}
+  .content{flex:1 1 auto;margin:0;padding-top:24px;border-top:1px solid transparent}
+  .content>*:first-child{margin-top:0}
 }
 
-/* ===== На десктопі вирівнюємо верх меню та контенту ===== */
-@media (min-width: 993px){
-  .sidebar{ padding-top:24px !important; }
-  .content{ padding-top:24px !important; }
+/* Toolbar: заголовок + пошук (стабільно на grid) */
+.toolbar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;margin-bottom:16px}
+.toolbar h2{margin:0}
+.toolbar .search{justify-self:end;display:flex;gap:8px;align-items:center;width:100%;max-width:640px}
+.toolbar .search input[type="text"]{flex:1;min-width:260px}
+
+/* Сітка карток */
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+
+/* Картка: медіа й фото */
+.card .media{height:220px;background:#0a0f1e;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #1f2937}
+.card .media img{width:100%;height:100%;object-fit:cover;object-position:center}
+
+/* Бейджі/кнопки базові (якщо їх ще нема у style.css) */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;background:#23304a;color:#d0d8e5;border:1px solid #1f2937}
+.badge.success{background:#0b2a17;color:#a7f3d0;border-color:#0f3a20}
+.badge.warn{background:#2b210a;color:#fde68a;border-color:#3a2b10}
+.badge.danger{background:#2a0b0b;color:#fecaca;border-color:#3b0f0f}
+.btn{border:none;cursor:pointer;font-weight:700;padding:8px 14px;border-radius:10px;transition:.15s}
+.btn:hover{transform:translateY(-1px);opacity:.95}
+.btn.primary{background:#2563eb;color:#fff}
+.btn.secondary{background:#2b3a5a;color:#e2e8f0}
+.btn.danger{background:#dc2626;color:#fff}
+
+/* Планшет/мобільна адаптація */
+@media (max-width:992px){
+  .topbar{display:flex}
+  .app{display:block}
+  .sidebar{position:fixed;z-index:1001;top:56px;bottom:0;left:-260px;width:240px;background:#0f172a;border-right:1px solid #1f2937;transition:left .2s ease}
+  .sidebar.open{left:0}
+  .content{padding:16px}
+  .toolbar{gap:12px}
+  .toolbar .search{justify-self:stretch;max-width:100%}
+  .toolbar .search input[type="text"]{min-width:0;width:min(480px,100%)}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .card .media{height:260px}
+  .actions{gap:6px}
+  .actions .btn{flex:0 0 auto}
+  .row input[type="number"]{width:100px}
 }
-
-/* ===== Toolbar: заголовок + пошук (стабільне вирівнювання) ===== */
-.toolbar{
-  display:grid;
-  grid-template-columns:auto 1fr; /* заголовок | пошук */
-  align-items:center;
-  gap:16px;
-  margin-bottom:16px;
-}
-.toolbar h2{ margin:0; }
-.toolbar .search{
-  justify-self:end;               /* притискаємо форму до правого краю контейнера */
-  display:flex; gap:8px; align-items:center;
-  width:100%; max-width:640px;
-}
-.toolbar .search input[type="text"]{
-  flex:1; min-width:260px;
-}
-
-/* ===== Сітка карток ===== */
-.grid{
-  display:grid;
-  gap:16px;
-  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
-}
-
-/* ===== Картка: медіа-зона та картинка ===== */
-.card .media{
-  height:220px;                   /* десктопна висота фото */
-  background:#0a0f1e;
-  display:flex; align-items:center; justify-content:center;
-  border-bottom:1px solid #1f2937;
-}
-.card .media img{
-  width:100%; height:100%;
-  object-fit:cover; object-position:center;
-}
-
-/* ===== Планшет/мобільна адаптація ===== */
-@media (max-width: 992px){
-  .topbar{ display:flex; }
-  .app{ display:block; }
-
-  /* офф-канвас сайдбар */
-  .sidebar{
-    position:fixed; z-index:1001;
-    top:56px; bottom:0; left:-260px; width:240px;
-    background:#0f172a; border-right:1px solid #1f2937;
-    transition:left .2s ease;
-  }
-  .sidebar.open{ left:0; }
-
-  .content{ padding:16px; }
-  .toolbar{ gap:12px; }
-  .toolbar .search{ justify-self:stretch; max-width:100%; }
-  .toolbar .search input[type="text"]{ min-width:0; width:min(480px,100%); }
-
-  .grid{ grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:12px; }
-  .card .media{ height:260px; }   /* вище фото на планшетах/мобі */
-
-  .actions{ gap:6px; }
-  .actions .btn{ flex:0 0 auto; }
-  .row input[type="number"]{ width:100px; }
-}
-
-@media (max-width: 600px){
-  .grid{ grid-template-columns:1fr; }
-  .card .media{ height:300px; }   /* ще вище на вузьких */
-  .row{ gap:8px; }
-  .btn{ padding:10px 12px; }
-}
-
-
-/* === ДЕСКТОП: лейаут і вирівнювання по одній лінії === */
-@media (min-width: 993px){
-  /* обгортка стає нормальним лейаутом двох колонок */
-  .app{
-    display: flex;
-    align-items: flex-start;       /* <- ВАЖЛИВО: починаємося на одному рівні зверху */
-  }
-
-  /* ліва панель фіксованої ширини + прилипає до верху */
-  .sidebar{
-    flex: 0 0 240px;               /* ширина лівого меню */
-    width: 240px;
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    padding-top: 24px;             /* той самий відступ, що й у контенту */
-  }
-
-  /* права частина — розтягнутись і не мати зовнішніх margin зверху */
-  .content{
-    flex: 1 1 auto;
-    margin: 0;                     /* забрати випадкові зовнішні відступи */
-    padding-top: 24px;             /* той самий відступ, що й у сайдбару */
-    /* прибираємо можливий колапс верхнього margin у першої дитини */
-    border-top: 1px solid transparent;
-  }
-
-  /* «полотно» всередині контенту — контрольована ширина і центр */
-  .content > .container{
-    max-width: 1280px;
-    margin: 0 auto;
-  }
-
-  /* на всякий: перший елемент в контенті без «несподіваного» верхнього відступу */
-  .content > *:first-child{ margin-top: 0; }
-  .toolbar{ margin-top: 0; }
-}
-
-/* === МОБІЛКА лишається як була (офф-канвас меню + топбар) === */
-@media (max-width: 992px){
-  .topbar{ display:flex; }
-  .sidebar{ top:56px; }
+@media (max-width:600px){
+  .grid{grid-template-columns:1fr}
+  .card .media{height:300px}
+  .row{gap:8px}
+  .btn{padding:10px 12px}
 }
