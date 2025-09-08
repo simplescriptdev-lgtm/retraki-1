@@ -1,5 +1,14 @@
 /* Topbar (mobile) */
-.topbar{display:none;position:sticky;top:0;z-index:1000;height:56px;padding:0 12px;background:#0f172a;border-bottom:1px solid #1f2937;align-items:center;gap:12px}
+/* Topbar — видимий на всіх екранах */
+.topbar{
+  display:flex;                  /* <-- було display:none */
+  position:sticky; top:0; z-index:1000;
+  height:56px; padding:0 12px;
+  background:#0f172a; border-bottom:1px solid #1f2937;
+  align-items:center; gap:12px;
+}
+
+
 .hamburger{width:40px;height:40px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:6px;border-radius:8px}
 .hamburger span{display:block;height:3px;width:22px;background:#e2e8f0;border-radius:3px;transition:.2s}
 .hamburger.is-open span:nth-child(1){transform:translateY(8px) rotate(45deg)}
