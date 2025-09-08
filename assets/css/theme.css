@@ -155,3 +155,13 @@
   border-color:rgba(37,99,235,.45);
   color:#dbeafe;
 }
+
+.searchbar{
+  display:flex; align-items:center; gap:8px;
+  margin-left:auto;                      /* притиснути вправо */
+  width: min(720px, 60vw);
+}
+.searchbar input[type="text"]{
+  flex:1; height:36px; padding:0 10px;
+}
+.searchbar .btn{ height:36px; }

@@ -42,20 +42,11 @@ $err = $_SESSION['inv_err'] ?? null; unset($_SESSION['inv_err']);
 ?>
 
 <!-- Шапка: заголовок + пошук -->
+<!-- Шапка розділу -->
 <div class="toolbar">
   <h2>Залишки</h2>
-
-  <!-- пошук через dashboard, щоб залишатися в SPA -->
-  <form method="get" action="/dashboard.php" class="search">
-    <input type="hidden" name="open" value="inventory">
-    <?php if ($cat !== '' && $cat !== 'all' && ctype_digit($cat)): ?>
-      <input type="hidden" name="cat" value="<?= (int)$cat ?>">
-    <?php endif; ?>
-    <input type="text" name="q" value="<?= htmlspecialchars($q) ?>"
-           placeholder="Пошук по назві / артикулу / бренду / сектору / категорії…">
-    <button class="btn secondary" type="submit">Пошук</button>
-  </form>
 </div>
+
 
 <!-- Панель фільтрів по категоріях -->
 <div class="filterbar">
