@@ -26,7 +26,6 @@ unset($_SESSION['error']);
       <input type="password" name="password" required>
       <button type="submit">Увійти</button>
     </form>
-    <p class="hint">Стартовий менеджер: <b>manager / manager123</b></p>
     <p class="hint"><b>created by Artem Shmat</b></p>
   </div>
 </body>
