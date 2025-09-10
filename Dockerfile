@@ -1,23 +1,24 @@
-# Легкий образ з PHP 8.2
 FROM php:8.2-cli
 
-# Встановлюємо потрібні пакети і розширення
-RUN apt-get update && apt-get install -y \
+# SQLite headers + інструменти для складання
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsqlite3-0 \
     libsqlite3-dev \
     pkg-config \
-    && docker-php-ext-install pdo pdo_sqlite \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential \
+ && docker-php-ext-configure pdo_sqlite --with-pdo-sqlite \
+ && docker-php-ext-install -j$(nproc) pdo_sqlite \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY . /app
 
-# Порт Render передає як змінну PORT
 ENV PORT=10000
 
-# Каталог для SQLite/файлів (якщо є змонтований диск)
+# каталог для даних (під диском Render, якщо підключите)
 RUN mkdir -p /var/data && chown -R www-data:www-data /var/data
 
-# Якщо index.php у корені:
+# якщо index.php у корені:
 CMD php -S 0.0.0.0:${PORT} -t .
-# Якщо index.php у public/, тоді заміни:
+# якщо у /public — замініть рядок вище на:
 # CMD php -S 0.0.0.0:${PORT} -t public
