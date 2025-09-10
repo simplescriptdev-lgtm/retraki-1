@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: my-php-app
+    env: docker
+    plan: free
+    autoDeploy: true
+    # Якщо потрібне постійне зберігання (SQLite, uploads):
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: production
+      # Можеш використати цю змінну, щоб у коді звертатися до каталогу даних:
+      - key: DATA_DIR
+        value: /var/data
+
